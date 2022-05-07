@@ -1,7 +1,7 @@
 const { expect } = require("chai");
 const { ethers } = require("hardhat");
 const fs = require("fs");
-const { groth16 } = require("snarkjs");
+const { groth16, plonk } = require("snarkjs");
 
 function unstringifyBigInts(o) {
     if ((typeof(o) == "string") && (/^[0-9]+$/.test(o) ))  {
@@ -34,7 +34,8 @@ describe("HelloWorld", function () {
     });
 
     it("Should return true for correct proof", async function () {
-        //[assignment] Add comments to explain what each line is doing
+        //[assignment] Add comments to explain what each line is doing //https://github.com/iden3/snarkjs#7-prepare-phase-2
+        //create the proof and calculate the witness in the same command
         const { proof, publicSignals } = await groth16.fullProve({"a":"1","b":"2"}, "contracts/circuits/HelloWorld/HelloWorld_js/HelloWorld.wasm","contracts/circuits/HelloWorld/circuit_final.zkey");
 
         console.log('1x2 =',publicSignals[0]);
@@ -64,12 +65,22 @@ describe("HelloWorld", function () {
 
 describe("Multiplier3 with Groth16", function () {
 
+    let Multiplier3;
+    let multiplier3;
+
     beforeEach(async function () {
         //[assignment] insert your script here
+        Multiplier3 = await ethers.getContractFactory("Multiplier3Verifier");
+        multiplier3 = await Multiplier3.deploy();
+        await multiplier3.deployed();
     });
 
     it("Should return true for correct proof", async function () {
         //[assignment] insert your script here
+        //create the proof and calculate the witness in the same command
+        const { proof, publicSignals } = await groth16.fullProve({"a":"3","b":"5","c":"7"}, "contracts/circuits/Multiplier3/Multiplier3_js/Multiplier3.wasm","contracts/circuits/Multiplier3/Multiplier3_final.zkey");
+
+        console.log('3x5X7 =',publicSignals[0]);
     });
     it("Should return false for invalid proof", async function () {
         //[assignment] insert your script here
@@ -78,13 +89,22 @@ describe("Multiplier3 with Groth16", function () {
 
 
 describe("Multiplier3 with PLONK", function () {
+    let Multiplier3;
+    let multiplier3;
 
     beforeEach(async function () {
         //[assignment] insert your script here
+        Multiplier3 = await ethers.getContractFactory("Multiplier3Verifier");
+        multiplier3 = await Multiplier3.deploy();
+        await multiplier3.deployed();
     });
 
     it("Should return true for correct proof", async function () {
         //[assignment] insert your script here
+        //create the proof and calculate the witness in the same command
+        const { proof, publicSignals } = await plonk.fullProve({"a":"7","b":"1","c":"3"}, "contracts/circuits/Multiplier3-plonk/Multiplier3_js/Multiplier3.wasm","contracts/circuits/Multiplier3-plonk/Multiplier3_final.zkey");
+
+        console.log('7x1X3 =',publicSignals[0]);
     });
     it("Should return false for invalid proof", async function () {
         //[assignment] insert your script here
